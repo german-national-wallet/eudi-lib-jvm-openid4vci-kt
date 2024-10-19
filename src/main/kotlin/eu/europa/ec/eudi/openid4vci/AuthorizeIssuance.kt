@@ -123,6 +123,7 @@ interface AuthorizeIssuance {
         authorizationCode: AuthorizationCode,
         serverState: String,
         authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
+        dPopNonce: String? = null,
     ): Result<AuthorizedRequest>
 
     /**
