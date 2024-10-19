@@ -56,9 +56,9 @@ afterEvaluate {
             create<MavenPublication>("mavenJava") {
                 groupId = "com.github.german-first-iteration"
                 artifactId = "eudi-lib-jvm-openid4vci-kt"
-                version = "0.0.3"
+                version = "0.0.4"
 
-                from(components["release"])
+                from(components["java"])
             }
         }
     }
