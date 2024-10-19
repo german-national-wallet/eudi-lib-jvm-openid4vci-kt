@@ -20,13 +20,8 @@ plugins {
     alias(libs.plugins.maven.publish)
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        mavenContent { snapshotsOnly() }
-    }
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
 }
 
 dependencies {
