@@ -43,6 +43,27 @@ dependencies {
     testImplementation(libs.cbor)
 }
 
+signing {
+    setRequired(project.hasProperty("signing.keyId"))
+    sign {
+        publishing.publications
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("mavenJava") {
+                groupId = "com.github.german-first-iteration"
+                artifactId = "eudi-lib-jvm-openid4vci-kt"
+                version = "0.0.1"
+
+                from(components["java"])
+            }
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get()))
