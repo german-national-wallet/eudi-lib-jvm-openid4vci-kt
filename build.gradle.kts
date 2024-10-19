@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.dependency.check)
     alias(libs.plugins.maven.publish)
+    id("maven-publish")
 }
 
 configurations.all {
