@@ -117,6 +117,7 @@ interface AuthorizeIssuance {
      * @param serverState The state returned from authorization server via front-channel
      * @param authDetailsOption Defines if upon access token request extra authorization details will be set to fine grain the
      * scope of the access token.
+     * @param dPopNonce The DPoP nonce used for proof-of-possession during the authorization.
      * @return an issuance request in authorized state
      */
     suspend fun AuthorizationRequestPrepared.authorizeWithAuthorizationCode(
