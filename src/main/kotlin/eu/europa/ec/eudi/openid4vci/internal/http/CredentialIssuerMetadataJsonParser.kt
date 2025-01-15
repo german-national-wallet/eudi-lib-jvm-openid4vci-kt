@@ -441,7 +441,7 @@ private data class W3CSignedJwtCredentialTO(
 
 @Serializable
 private data class BatchCredentialIssuanceTO(
-    @SerialName("batch_size") @Required val batchSize: Int,
+    @SerialName("batch_size") @Required val batchSize: Int = 5,
 )
 
 /**
