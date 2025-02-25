@@ -219,4 +219,9 @@ interface AuthorizeIssuance {
         txCode: String?,
         authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
     ): Result<AuthorizedRequest>
+
+    suspend fun issueWithRefreshToken(
+        refreshToken: String,
+        authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
+    ): Result<AuthorizedRequest>
 }

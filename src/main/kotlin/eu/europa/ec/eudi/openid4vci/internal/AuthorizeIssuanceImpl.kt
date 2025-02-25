@@ -56,7 +56,13 @@ internal class AuthorizeIssuanceImpl(
                     state,
                     issuerState,
                 ).getOrThrow()
-            AuthorizationRequestPrepared(authorizationCodeUrl, codeVerifier, state, configurationIds, dpopNonce)
+            AuthorizationRequestPrepared(
+                authorizationCodeUrl,
+                codeVerifier,
+                state,
+                configurationIds,
+                dpopNonce
+            )
         }
 
     private fun scopesAndCredentialConfigurationIds(): Pair<List<Scope>, List<CredentialConfigurationIdentifier>> {
@@ -71,7 +77,8 @@ internal class AuthorizeIssuanceImpl(
         for (id in credentialOffer.credentialConfigurationIdentifiers) {
             val credentialConfiguration = credentialConfigurationById(id)
             fun authDetailsByCfgId() = configurationIdentifiers.add(id)
-            fun addScope(): Boolean = credentialConfiguration.scope?.let { scopes.add(Scope(it)) } ?: false
+            fun addScope(): Boolean =
+                credentialConfiguration.scope?.let { scopes.add(Scope(it)) } ?: false
             when (config.authorizeIssuanceConfig) {
                 AuthorizeIssuanceConfig.AUTHORIZATION_DETAILS -> authDetailsByCfgId()
                 AuthorizeIssuanceConfig.FAVOR_SCOPES -> if (!addScope()) authDetailsByCfgId()
@@ -119,7 +126,35 @@ internal class AuthorizeIssuanceImpl(
                 credConfigIdsAsAuthDetails,
                 dpopNonce = null,
             ).getOrThrow()
-        authorizedRequest(credentialOffer, tokenResponse, newDpopNonce, Grant.PreAuthorizedCodeGrant)
+        authorizedRequest(
+            credentialOffer,
+            tokenResponse,
+            newDpopNonce,
+            Grant.PreAuthorizedCodeGrant
+        )
+    }
+
+    override suspend fun issueWithRefreshToken(
+        refreshToken: String,
+        authDetailsOption: AccessTokenOption
+    ): Result<AuthorizedRequest> = runCatching {
+
+        val credConfigIdsAsAuthDetails =
+            credentialOffer.credentialConfigurationIdentifiers.filter(authDetailsOption)
+
+        val (tokenResponse, newDpopNonce) =
+            tokenEndpointClient.refreshAccessToken(
+                RefreshToken(refreshToken),
+                null,
+
+                ).getOrThrow()
+
+        authorizedRequest(
+            credentialOffer,
+            tokenResponse,
+            newDpopNonce,
+            Grant.PreAuthorizedCodeGrant
+        )
     }
 }
 
@@ -153,7 +188,8 @@ private fun authorizedRequest(
     grant: Grant,
 ): AuthorizedRequest {
     val offerRequiresProofs = offer.credentialConfigurationIdentifiers.any {
-        val credentialConfiguration = offer.credentialIssuerMetadata.credentialConfigurationsSupported[it]
+        val credentialConfiguration =
+            offer.credentialIssuerMetadata.credentialConfigurationsSupported[it]
         credentialConfiguration != null && credentialConfiguration.proofTypesSupported.values.isNotEmpty()
     }
     val (accessToken, refreshToken, cNonce, authorizationDetails, timestamp) = tokenResponse
