@@ -105,7 +105,7 @@ internal class RequestIssuanceImpl(
                         }
                     }
                 }
-                popSigners.map { proofFactory(it, cNonce, grant) }
+                popSigners.map { proofFactory(proofSigner = it, cNonce, grant) }
             }
         }
 
