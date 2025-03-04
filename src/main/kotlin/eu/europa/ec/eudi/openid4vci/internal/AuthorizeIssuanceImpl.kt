@@ -137,28 +137,22 @@ internal class AuthorizeIssuanceImpl(
         )
     }
 
-    override suspend fun issueWithRefreshToken(
-        refreshToken: String,
-        authDetailsOption: AccessTokenOption
-    ): Result<AuthorizedRequest> = runCatching {
 
-        val credConfigIdsAsAuthDetails =
-            credentialOffer.credentialConfigurationIdentifiers.filter(authDetailsOption)
+    override suspend fun issueWithRefreshToken(refreshToken: String): Result<AuthorizedRequest> =
+        runCatching {
+            val (tokenResponse, newDpopNonce) =
+                tokenEndpointClient.refreshAccessToken(
+                    RefreshToken(refreshToken),
+                    null,
 
-        val (tokenResponse, newDpopNonce) =
-            tokenEndpointClient.refreshAccessToken(
-                RefreshToken(refreshToken),
-                null,
-
-                ).getOrThrow()
-
-        authorizedRequest(
-            credentialOffer,
-            tokenResponse,
-            newDpopNonce,
-            Grant.PreAuthorizedCodeGrant
-        )
-    }
+                    ).getOrThrow()
+            authorizedRequest(
+                credentialOffer,
+                tokenResponse,
+                newDpopNonce,
+                Grant.PreAuthorizedCodeGrant
+            )
+        }
 }
 
 private fun Grants.PreAuthorizedCode.validate(txCode: String?) {
