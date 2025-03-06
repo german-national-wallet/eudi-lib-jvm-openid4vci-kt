@@ -219,4 +219,15 @@ interface AuthorizeIssuance {
         txCode: String?,
         authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
     ): Result<AuthorizedRequest>
+
+    /**
+     * Issues a new authorized request using the provided refresh token.
+     *
+     * This method attempts to refresh the access token via the token endpoint client.
+     * If successful, it returns a `Result` containing an `AuthorizedRequest`.
+     *
+     * @param refreshToken The refresh token used to obtain a new access token.
+     * @return Result<authorizedRequest> with the new access code
+     */
+    suspend fun issueWithRefreshToken(refreshToken: String): Result<AuthorizedRequest>
 }

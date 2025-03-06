@@ -70,7 +70,8 @@ internal abstract class ProofBuilder<POP_SIGNER : PopSigner, out PROOF : Proof>(
                 Grant.AuthorizationCode -> true
                 Grant.PreAuthorizedCodeGrant -> when (client) {
                     is Client.Attested -> true
-                    is Client.Public -> false
+                    is Client.Public -> true // TODO revert this value to false
+                // once the PID issuer is fixed, at the moment the creation of the issuer is fixed to public WD-426 for more info
                 }
             }
             return client.id.takeIf { useIss }
