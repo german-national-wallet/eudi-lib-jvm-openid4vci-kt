@@ -79,8 +79,9 @@ data class AuthorizedRequest(
             authorizationServerDpopNonce = newAuthorizationServerDpopNonce,
         )
 
-    fun withResourceServerDpopNonce(newResourceServerDpopNonce: Nonce?): AuthorizedRequest =
-        copy(resourceServerDpopNonce = newResourceServerDpopNonce)
+    fun withResourceServerDpopNonce(newResourceServerDpopNonce: Nonce?): AuthorizedRequest = copy(
+        resourceServerDpopNonce = newResourceServerDpopNonce,
+    )
 }
 
 sealed interface AccessTokenOption {
@@ -117,14 +118,12 @@ interface AuthorizeIssuance {
      * @param serverState The state returned from authorization server via front-channel
      * @param authDetailsOption Defines if upon access token request extra authorization details will be set to fine grain the
      * scope of the access token.
-     * @param dPopNonce The DPoP nonce used for proof-of-possession during the authorization.
      * @return an issuance request in authorized state
      */
     suspend fun AuthorizationRequestPrepared.authorizeWithAuthorizationCode(
         authorizationCode: AuthorizationCode,
         serverState: String,
         authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
-        dPopNonce: String? = null,
     ): Result<AuthorizedRequest>
 
     /**
@@ -138,15 +137,4 @@ interface AuthorizeIssuance {
         txCode: String?,
         authDetailsOption: AccessTokenOption = AccessTokenOption.AsRequested,
     ): Result<AuthorizedRequest>
-
-    /**
-     * Issues a new authorized request using the provided refresh token.
-     *
-     * This method attempts to refresh the access token via the token endpoint client.
-     * If successful, it returns a `Result` containing an `AuthorizedRequest`.
-     *
-     * @param refreshToken The refresh token used to obtain a new access token.
-     * @return Result<authorizedRequest> with the new access code
-     */
-    suspend fun issueWithRefreshToken(refreshToken: String): Result<AuthorizedRequest>
 }
