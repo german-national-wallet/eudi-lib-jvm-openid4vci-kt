@@ -79,7 +79,6 @@ internal sealed interface TokenResponseTO {
                     refreshToken = refreshToken?.let { RefreshToken(it) },
                     authorizationDetails = authorizationDetails ?: emptyMap(),
                     timestamp = clock.instant(),
-                    dpopNonce = dPopNonce
                 )
             }
 
