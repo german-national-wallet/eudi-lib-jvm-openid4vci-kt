@@ -1,7 +1,7 @@
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
+//import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
 import java.net.URL
 
 object Meta {
@@ -15,9 +15,11 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.spotless)
+    // EUDI-removed
+//    alias(libs.plugins.spotless)
     alias(libs.plugins.sonarqube)
-    alias(libs.plugins.dependency.check)
+    // EUDI-removed
+//    alias(libs.plugins.dependency.check)
     alias(libs.plugins.maven.publish)
     id("maven-publish")
 }
@@ -33,14 +35,23 @@ dependencies {
     api(libs.ktor.client.serialization)
     api(libs.ktor.serialization.kotlinx.json)
     testImplementation(libs.kotlinx.coroutines.test)
+    // EUDI-removed
+    /*
     testImplementation(libs.jsoup)
+    */
     testImplementation(kotlin("test"))
+    // EUDI-removed
+    /*
     testImplementation(libs.ktor.client.okhttp)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.client.mock)
+     */
     testImplementation(libs.ktor.client.logging)
+    // EUDI-removed
+    /*
     testImplementation(libs.logback.classic)
+    */
     testImplementation(libs.cbor)
 }
 
@@ -83,6 +94,8 @@ kotlin {
     }
 }
 
+// EUDI-removed
+/*
 spotless {
     kotlin {
         ktlint(libs.versions.ktlint.get())
@@ -157,3 +170,4 @@ dependencyCheckExtension?.apply {
     formats = mutableListOf("XML", "HTML")
     nvd.apiKey = nvdApiKey ?: ""
 }
+*/
