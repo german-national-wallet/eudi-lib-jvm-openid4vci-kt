@@ -1,8 +1,9 @@
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinJvm
-import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
+//import com.vanniktech.maven.publish.JavadocJar
+//import com.vanniktech.maven.publish.KotlinJvm
+//import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import java.net.URI
+//import org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension
+import java.net.URL
 
 object Meta {
     const val BASE_URL = "https://github.com/eu-digital-identity-wallet/eudi-lib-jvm-openid4vci-kt"
@@ -11,13 +12,18 @@ object Meta {
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    // EUDI-removed
+    /*
     alias(libs.plugins.spotless)
     alias(libs.plugins.kover)
     alias(libs.plugins.dokka)
     alias(libs.plugins.maven.publish)
     alias(libs.plugins.dependency.check)
+    */
 }
 
+// EUDI-removed
+/*
 repositories {
     mavenCentral()
     mavenLocal()
@@ -26,6 +32,7 @@ repositories {
         mavenContent { snapshotsOnly() }
     }
 }
+*/
 
 dependencies {
     api(libs.nimbus.oauth2.oidc.sdk)
@@ -36,18 +43,27 @@ dependencies {
     api(libs.ktor.serialization.kotlinx.json)
     implementation(libs.uri.kmp)
     testImplementation(libs.kotlinx.coroutines.test)
+    // EUDI-removed
+    /*
     testImplementation(libs.jsoup)
+    */
     testImplementation(kotlin("test"))
+    // EUDI-removed
+    /*
     testImplementation(libs.ktor.client.okhttp)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.client.mock)
+     */
     testImplementation(libs.ktor.client.logging)
+    // EUDI-removed
+    /*
     testImplementation(libs.logback.classic)
     testImplementation(libs.cbor)
     testImplementation(libs.tink)
     testImplementation(libs.bouncycastle.pkix)
     testImplementation(libs.selenium.java)
+    */
 }
 
 java {
@@ -64,6 +80,8 @@ kotlin {
     }
 }
 
+// EUDI-removed
+/*
 spotless {
     kotlin {
         ktlint(libs.versions.ktlint.get())
@@ -131,3 +149,4 @@ dependencyCheck {
         apiKey = System.getenv("NVD_API_KEY") ?: properties["nvdApiKey"]?.toString() ?: ""
     }
 }
+*/
