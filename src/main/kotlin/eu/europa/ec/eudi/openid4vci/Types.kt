@@ -335,6 +335,8 @@ val CIAuthorizationServerMetadata.clientAttestationJWSAlgs: List<JWSAlgorithm>?
         AttestationBasedClientAuthenticationSpec.ATTESTATION_JWT_SIGNING_ALGORITHMS_SUPPORTED,
     )
         ?.mapNotNull { JWSAlgorithm.parse(it) }
+        // EUDI-added
+        ?: listOf(JWSAlgorithm.ES256)
 
 val CIAuthorizationServerMetadata.clientAttestationPOPJWSAlgs: List<JWSAlgorithm>?
     get() = JSONObjectUtils.getStringList(
@@ -342,6 +344,8 @@ val CIAuthorizationServerMetadata.clientAttestationPOPJWSAlgs: List<JWSAlgorithm
         AttestationBasedClientAuthenticationSpec.ATTESTATION_POP_JWT_SIGNING_ALGORITHMS_SUPPORTED,
     )
         ?.mapNotNull { JWSAlgorithm.parse(it) }
+        // EUDI-added
+        ?: listOf(JWSAlgorithm.ES256)
 
 @JvmInline
 value class CoseAlgorithm(val value: Int) {
