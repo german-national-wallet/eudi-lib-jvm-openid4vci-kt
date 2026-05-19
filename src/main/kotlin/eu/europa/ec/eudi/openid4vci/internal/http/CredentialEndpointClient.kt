@@ -97,7 +97,7 @@ internal class CredentialEndpointClient(
             if (response.isResourceServerDpopNonceRequired() && newResourceServerDpopNonce != null && !retried) {
                 placeIssuanceRequestInternal(accessToken, newResourceServerDpopNonce, request, true)
             } else {
-                val error = response.body<GenericErrorResponseTO>()
+                val error = response.errorResponseOrFallback()
                 SubmissionOutcomeInternal.Failed(error.toIssuanceError()) to (
                     newResourceServerDpopNonce
                         ?: resourceServerDpopNonce

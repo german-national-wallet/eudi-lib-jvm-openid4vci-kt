@@ -24,6 +24,9 @@ import eu.europa.ec.eudi.openid4vci.*
 import eu.europa.ec.eudi.openid4vci.CredentialIssuerMetadataValidationError.InvalidCredentialIssuerId
 import eu.europa.ec.eudi.openid4vci.internal.*
 import kotlinx.serialization.*
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import java.net.URI
 import java.time.Duration
@@ -155,6 +158,7 @@ private data class MsdMdocCredentialTO(
     @SerialName("cryptographic_binding_methods_supported")
     override val cryptographicBindingMethodsSupported: List<String>? = null,
     @SerialName("credential_signing_alg_values_supported")
+    @Serializable(with = CoseAlgorithmListSerializer::class)
     val credentialSigningAlgorithmsSupported: List<Int>? = null,
     @SerialName("proof_types_supported")
     override val proofTypesSupported: Map<String, ProofTypeSupportedMetaTO>? = null,
@@ -191,6 +195,43 @@ private data class MsdMdocCredentialTO(
             docType,
         )
     }
+}
+
+/**
+ * Some issuers provide MSO mdoc signing algorithms as JOSE names (e.g. "ES256")
+ * instead of COSE numeric identifiers (e.g. -7). Accept both to be robust.
+ */
+private object CoseAlgorithmListSerializer : KSerializer<List<Int>> {
+    private val delegate = ListSerializer(JsonElement.serializer())
+
+    override val descriptor = delegate.descriptor
+
+    override fun deserialize(decoder: Decoder): List<Int> {
+        val values = delegate.deserialize(decoder)
+        return values.map { element ->
+            when (element) {
+                is JsonPrimitive -> {
+                    element.intOrNull
+                        ?: element.contentOrNull?.let(::joseAlgToCose)
+                        ?: throw SerializationException("Invalid COSE/Jose algorithm value: $element")
+                }
+                else -> throw SerializationException("Invalid algorithm element: $element")
+            }
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: List<Int>) {
+        delegate.serialize(encoder, value.map { JsonPrimitive(it) })
+    }
+
+    private fun joseAlgToCose(value: String): Int =
+        when (value.uppercase()) {
+            "ES256" -> -7
+            "ES384" -> -35
+            "ES512" -> -36
+            "EDDSA" -> -8
+            else -> throw SerializationException("Unsupported JOSE algorithm for COSE mapping: $value")
+        }
 }
 
 @Suppress("unused")

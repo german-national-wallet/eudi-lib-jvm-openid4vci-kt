@@ -61,7 +61,7 @@ internal class NotificationEndPointClient(
             if (response.isResourceServerDpopNonceRequired() && newResourceServerDpopNonce != null && !retried) {
                 notifyIssuerInternal(accessToken, newResourceServerDpopNonce, event, true)
             } else {
-                val errorResponse = response.body<GenericErrorResponseTO>()
+                val errorResponse = response.errorResponseOrFallback()
                 throw NotificationFailed(errorResponse.error)
             }
         }
