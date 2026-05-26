@@ -77,7 +77,10 @@ internal class RequestIssuanceImpl(
         val credentialRequest = buildRequest(requestPayload, proofs, credentialIdentifiers.orEmpty())
 
         // Place the request
-        val proofsOrAuthRequestDpopNonce = proofsDpopNonce ?: resourceServerDpopNonce
+        // Use only resource-server nonce for DPoP proofs at the credential endpoint.
+        // `proofsDpopNonce` can originate from nonce endpoint responses and may belong to
+        // a different nonce contract than the resource server `/credential` endpoint.
+        val proofsOrAuthRequestDpopNonce = resourceServerDpopNonce
         val (outcome, newResourceServerDpopNonce) =
             credentialEndpointClient.placeIssuanceRequest(
                 accessToken,
