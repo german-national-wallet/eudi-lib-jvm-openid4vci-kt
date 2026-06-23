@@ -33,10 +33,13 @@ fun interface SignFunction {
  * @param PUB The type of the public material used in the signing process.
  * @property function The signing operation to be executed, represented by the [SignFunction] functional interface.
  * @property publicMaterial The public material associated with the signing operation.
+ * @property dpopKeyAttestation Optional Wallet Trust Evidence to be embedded as `key_attestation`
+ * in token-endpoint DPoP proofs.
  */
 data class SignOperation<out PUB>(
     val function: SignFunction,
     val publicMaterial: PUB,
+    val dpopKeyAttestation: String? = null,
 )
 
 /**
@@ -49,6 +52,19 @@ data class SignOperation<out PUB>(
 data class BatchSignOperation<out PUB>(
     val operations: List<SignOperation<PUB>>,
 )
+
+/**
+ * Optional capability for DPoP signers that need to create or select a key bound to
+ * an authorization-server DPoP nonce before producing token-endpoint proofs.
+ *
+ * The regular [Signer.acquire] contract is intentionally nonce-free because most
+ * signers use one pre-created key for every DPoP proof. Implement this interface only
+ * when the signer must react to the token endpoint nonce first, for example by creating
+ * an attested key whose Wallet Trust Evidence is embedded in the resulting DPoP proof.
+ */
+interface DPoPKeyAttestationSigner {
+    suspend fun prepareKeyAttestation(nonce: Nonce)
+}
 
 /**
  * Represents a generic Signer interface that manages signing operations.

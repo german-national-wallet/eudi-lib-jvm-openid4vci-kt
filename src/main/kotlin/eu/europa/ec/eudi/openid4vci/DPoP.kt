@@ -17,6 +17,7 @@ package eu.europa.ec.eudi.openid4vci
 
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.oauth2.sdk.dpop.DPoPUtils
 import com.nimbusds.oauth2.sdk.id.JWTID
@@ -56,7 +57,12 @@ class DPoPJwtFactory(
         htu: URL,
         accessToken: AccessToken.DPoP? = null,
         nonce: Nonce? = null,
+        includeKeyAttestation: Boolean = false,
     ): Result<SignedJWT> = runCatchingCancellable {
+        if (includeKeyAttestation && nonce != null) {
+            (signer as? DPoPKeyAttestationSigner)?.prepareKeyAttestation(nonce)
+        }
+
         val jwtClaimsSet = DPoPUtils.createJWTClaimsSet(
             jti(),
             htm.name,
@@ -69,12 +75,16 @@ class DPoPJwtFactory(
         )
 
         val signedJwt = signer.use { signOperation ->
+            val claimsToSign = jwtClaimsSet.withKeyAttestation(
+                includeKeyAttestation = includeKeyAttestation,
+                keyAttestation = signOperation.dpopKeyAttestation,
+            )
             JwtSigner(
                 serializer = JWTClaimsSetSerializer,
                 signOperation = signOperation,
                 algorithm = signer.javaAlgorithm.toJoseAlg(),
                 customizeHeader = { key -> dpopJwtHeader(key) },
-            ).sign(jwtClaimsSet)
+            ).sign(claimsToSign)
         }
         SignedJWT.parse(signedJwt)
     }
@@ -87,7 +97,21 @@ class DPoPJwtFactory(
     private fun now(): Date = Date.from(clock.instant())
     private fun jti(): JWTID = JWTID(jtiByteLength)
 
+    private fun JWTClaimsSet.withKeyAttestation(
+        includeKeyAttestation: Boolean,
+        keyAttestation: String?,
+    ): JWTClaimsSet =
+        if (includeKeyAttestation && keyAttestation != null) {
+            JWTClaimsSet.Builder(this)
+                .claim(KEY_ATTESTATION_CLAIM, keyAttestation)
+                .build()
+        } else {
+            this
+        }
+
     companion object {
+        private const val KEY_ATTESTATION_CLAIM = "key_attestation"
+
         operator fun invoke(
             jtiByteLength: Int = NimbusDPoPProofFactory.MINIMAL_JTI_BYTE_LENGTH,
             clock: Clock,
