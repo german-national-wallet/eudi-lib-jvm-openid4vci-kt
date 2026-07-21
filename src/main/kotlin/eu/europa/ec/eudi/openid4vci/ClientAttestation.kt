@@ -65,12 +65,25 @@ data class ClientAttestationJWTClaims(
     @Required @SerialName(RFC7800.CONFIRMATION) val confirmation: ConfirmationClaim,
     @SerialName(RFC7519.ISSUED_AT) val issuedAt: InstantAsEpochSecond? = null,
     @SerialName(RFC7519.NOT_BEFORE) val notBefore: InstantAsEpochSecond? = null,
-    @Required @SerialName(OpenId4VCISpec.WALLET_ATTESTATION_WALLET_NAME) val walletName: NonBlankString,
+    // BEGIN EUDI-changed: Temporarily treat these as optional to unblock PID issuance.
+    // Revert once the backend emits these claims (TS 119 472-3).
+    /*
+    @Required @SerialName(OpenId4VCISpec.WALLET_ATTESTATION_WALLET_NAME) val walletName: NonBlankString? = null,
+    */
+    @SerialName(OpenId4VCISpec.WALLET_ATTESTATION_WALLET_NAME) val walletName: NonBlankString? = null,
+    // END EUDI-changed: Temporarily treat these as optional to unblock PID issuance.
     @SerialName(OpenId4VCISpec.WALLET_ATTESTATION_WALLET_LINK) val walletLink: NonBlankString? = null,
     @SerialName(TokenStatusListSpec.STATUS) val status: StatusClaim? = null,
-    @Required @SerialName(TS3.WALLET_VERSION) val walletVersion: NonBlankString,
+    // BEGIN EUDI-changed: Temporarily treat these as optional to unblock PID issuance.
+    /*
+    @Required @SerialName(TS3.WALLET_VERSION) val walletVersion: NonBlankString? = null,
     @Required @SerialName(TS3.WALLET_SOLUTION_CERTIFICATION_INFORMATION) val walletSolutionCertificationInformation:
-        WalletSolutionCertificationInformation,
+        WalletSolutionCertificationInformation? = null,
+     */
+    @SerialName(TS3.WALLET_VERSION) val walletVersion: NonBlankString? = null,
+    @SerialName(TS3.WALLET_SOLUTION_CERTIFICATION_INFORMATION) val walletSolutionCertificationInformation:
+    // END EUDI-changed: Temporarily treat these as optional to unblock PID issuance.
+    WalletSolutionCertificationInformation? = null,
     @Required @SerialName(TS3.CLIENT_STATUS) val clientStatus: ClientStatusClaim,
 )
 
