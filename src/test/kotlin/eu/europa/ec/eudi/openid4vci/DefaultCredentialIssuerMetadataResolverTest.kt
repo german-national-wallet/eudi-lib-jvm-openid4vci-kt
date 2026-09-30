@@ -654,12 +654,57 @@ internal class DefaultCredentialIssuerMetadataResolverTest {
             IssuerMetadataPolicy.PreferSigned(trustAll, emptySet())
         }
     }
+
+    @Test
+    internal fun `required signed metadata is requested accepting only application jwt`() = runTest {
+        val acceptHeaders = mutableListOf<String>()
+        val resolver = resolver(acceptNegotiatingMetadataHandler(acceptHeaders))
+
+        val metadata = assertDoesNotThrow {
+            resolver.resolve(SampleIssuer.Id, IssuerMetadataPolicy.RequireSigned(trustAll)).getOrThrow()
+        }
+
+        assertEquals(credentialIssuerSignedMetadata(), metadata)
+        assertEquals(listOf("application/jwt"), acceptHeaders)
+    }
+
+    @Test
+    internal fun `preferred signed metadata is requested accepting application jwt and application json`() = runTest {
+        val acceptHeaders = mutableListOf<String>()
+        val resolver = resolver(acceptNegotiatingMetadataHandler(acceptHeaders))
+
+        resolver.resolve(SampleIssuer.Id, IssuerMetadataPolicy.PreferSigned(trustAll)).getOrThrow()
+
+        assertEquals(setOf("application/jwt", "application/json"), acceptHeaders.toSet())
+    }
 }
 
 private fun Map<CredentialConfigurationIdentifier, CredentialConfiguration>.jwtProofTypeSupported(
     credentialConfigId: String,
 ): List<ProofTypeMeta.Jwt>? =
     this[CredentialConfigurationIdentifier(credentialConfigId)]?.proofTypesSupported?.values?.filterIsInstance<ProofTypeMeta.Jwt>()
+
+/**
+ * Mimics issuers that pick the metadata format from the `Accept` header, returning unsigned
+ * metadata whenever `application/json` is acceptable. Records the requested content types.
+ */
+private fun acceptNegotiatingMetadataHandler(acceptHeaders: MutableList<String>): RequestMocker = RequestMocker(
+    match(SampleIssuer.WellKnownUrl.value.toURI()),
+    { request ->
+        val accepted = request?.headers?.getAll(HttpHeaders.Accept).orEmpty()
+            .flatMap { it.split(",") }
+            .map { it.substringBefore(";").trim() }
+        acceptHeaders += accepted
+        if ("application/json" in accepted) {
+            jsonResponse("eu/europa/ec/eudi/openid4vci/internal/credential_issuer_metadata_valid.json")(this, request)
+        } else {
+            jsonResponse(
+                "eu/europa/ec/eudi/openid4vci/internal/credential_issuer_metadata_with_signed_full.txt",
+                listOf("application/jwt"),
+            )(this, request)
+        }
+    },
+)
 
 private fun resolver(request: RequestMocker, expectSuccessOnly: Boolean = false) =
     CredentialIssuerMetadataResolver(

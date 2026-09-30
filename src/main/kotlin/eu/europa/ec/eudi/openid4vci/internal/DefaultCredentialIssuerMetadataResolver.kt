@@ -33,6 +33,7 @@ import eu.europa.ec.eudi.openid4vci.*
 import eu.europa.ec.eudi.openid4vci.internal.http.CredentialIssuerMetadataJsonParser
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -179,6 +180,11 @@ internal class DefaultCredentialIssuerMetadataResolver(
         try {
             val response = httpClient.get(this) {
                 contentTypes.forEach { accept(it) }
+                // ContentNegotiation adds application/json to Accept, and issuers that pick the
+                // format by Accept then answer a request for signed metadata with unsigned JSON.
+                if (ContentType.Application.Json !in contentTypes) {
+                    exclude(ContentType.Application.Json)
+                }
             }
             require(response.status.isSuccess()) {
                 "Credential issuer responded with status code: ${response.status}"
