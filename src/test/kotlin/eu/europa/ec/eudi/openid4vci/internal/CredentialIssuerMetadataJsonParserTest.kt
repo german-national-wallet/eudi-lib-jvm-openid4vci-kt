@@ -50,7 +50,8 @@ class CredentialIssuerMetadataJsonParserTest {
 
         val attestationProof = assertNotNull(credentialConfiguration.proofTypesSupported[ProofType.ATTESTATION])
         check(attestationProof is ProofTypeMeta.Attestation)
-        assertEquals(1.days.toJavaDuration(), attestationProof.keyAttestationRequirement.preferredKeyStorageStatusPeriod?.value)
+        val attestationKeyAttestationRequirement = assertNotNull(attestationProof.keyAttestationRequirement)
+        assertEquals(1.days.toJavaDuration(), attestationKeyAttestationRequirement.preferredKeyStorageStatusPeriod?.value)
     }
 
     @Test
@@ -74,6 +75,36 @@ class CredentialIssuerMetadataJsonParserTest {
 
         val jwtProof = assertIs<ProofTypeMeta.Jwt>(credentialConfiguration.proofTypesSupported[ProofType.JWT])
         assertNull(jwtProof.keyAttestationRequirement)
+    }
+
+    @Test
+    fun `succeeds when attestation proof does not require key attestation`() {
+        val json = getResourceAsText("well-known/openid-credential-issuer_attestation_proof_no_keyattestation.json")
+        val metadata = CredentialIssuerMetadataJsonParser.parseMetaData(json, SampleIssuer.Id)
+        val credentialConfiguration = assertNotNull(
+            metadata.credentialConfigurationsSupported[CredentialConfigurationIdentifier("eu.europa.ec.eudiw.pid_vc_sd_jwt")],
+        )
+
+        val attestationProof =
+            assertIs<ProofTypeMeta.Attestation>(credentialConfiguration.proofTypesSupported[ProofType.ATTESTATION])
+        assertNull(attestationProof.keyAttestationRequirement)
+        val jwtProof = assertIs<ProofTypeMeta.Jwt>(credentialConfiguration.proofTypesSupported[ProofType.JWT])
+        assertNull(jwtProof.keyAttestationRequirement)
+    }
+
+    @Test
+    fun `empty key_attestations_required on attestation proof is a requirement without constraints`() {
+        val json = getResourceAsText("well-known/openid-credential-issuer_attestation_proof_empty_keyattestation.json")
+        val metadata = CredentialIssuerMetadataJsonParser.parseMetaData(json, SampleIssuer.Id)
+        val credentialConfiguration = assertNotNull(
+            metadata.credentialConfigurationsSupported[CredentialConfigurationIdentifier("eu.europa.ec.eudiw.pid_vc_sd_jwt")],
+        )
+
+        val attestationProof =
+            assertIs<ProofTypeMeta.Attestation>(credentialConfiguration.proofTypesSupported[ProofType.ATTESTATION])
+        val requirement = assertNotNull(attestationProof.keyAttestationRequirement)
+        assertNull(requirement.keyStorage)
+        assertNull(requirement.userAuthentication)
     }
 
     @Test

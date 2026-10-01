@@ -330,7 +330,7 @@ internal class RequestIssuanceImpl(
     ): Proof.Attestation {
         val keyAttestationJwt = proofSpecification.attestationProvider(
             cNonce,
-            proofRequirement.keyAttestationRequirement.preferredKeyStorageStatusPeriod,
+            proofRequirement.keyAttestationRequirement?.preferredKeyStorageStatusPeriod,
         )
         keyAttestationJwt.ensureKeyAttestationJwtAlgIsSupported(proofRequirement)
         keyAttestationJwt.attestedKeys.assertMatchesBatchIssuanceBatchSize(selectedReusePolicy)

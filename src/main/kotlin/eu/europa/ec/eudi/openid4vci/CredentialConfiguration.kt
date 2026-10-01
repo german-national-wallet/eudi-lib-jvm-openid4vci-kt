@@ -73,7 +73,10 @@ sealed interface ProofTypeMeta : Serializable {
 
     data class Attestation(
         val algorithms: List<JWSAlgorithm>,
-        val keyAttestationRequirement: KeyAttestationRequirement,
+        /**
+         * `null` when the metadata omits `key_attestations_required`, which is OPTIONAL in OpenID4VCI.
+         */
+        val keyAttestationRequirement: KeyAttestationRequirement?,
     ) : ProofTypeMeta {
         init {
             require(algorithms.isNotEmpty()) { "Supported algorithms in case of Attestation cannot be empty" }

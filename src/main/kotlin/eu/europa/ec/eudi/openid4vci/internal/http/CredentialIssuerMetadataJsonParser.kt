@@ -687,9 +687,7 @@ private fun proofTypeMeta(type: String, meta: ProofTypeSupportedMetaTO): ProofTy
 
         "attestation" -> {
             val algorithms = meta.algorithms.map { JWSAlgorithm.parse(it) }
-            val keyAttestationRequirement = requireNotNull(meta.keyAttestationRequirement?.toDomain()) {
-                "attestation proof must contain 'key_attestations_required'"
-            }
+            val keyAttestationRequirement = meta.keyAttestationRequirement?.toDomain()
             ProofTypeMeta.Attestation(algorithms, keyAttestationRequirement)
         }
 
